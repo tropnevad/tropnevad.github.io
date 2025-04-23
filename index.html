@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Let Me ChatGPT That For You</title>
-  <meta property="og:title" content="Let Me ChatGPT That For You">
-  <meta property="og:description" content="Generate a playful link that shows someone how to ask ChatGPT.">
-  <meta property="og:image" content="https://chat.openai.com/favicon.ico">
+  <meta property="og:title" content="Let Me ChatGPT That For You" />
+  <meta property="og:description" content="Generate a playful link that shows someone how to ask ChatGPT." />
+  <meta property="og:image" content="https://chat.openai.com/favicon.ico" />
   <style>
-    /* --- Base layout --- */
     :root {
       --gpt-green: #11a37f;
       --bg: #eceff1;
@@ -33,59 +32,78 @@
     a {
       color: var(--gpt-green);
     }
-
-    /* --- Card --- */
     #wrapper {
       background: #fff;
       padding: 2rem 2.5rem;
       border-radius: var(--radius);
-      box-shadow: 0 4px 18px rgba(0,0,0,.12);
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
       width: 90%;
-      max-width: 640px;
+      max-width: 680px;
       text-align: center;
     }
-
     h1 {
       font-size: 2rem;
       margin: 0 0 1.5rem 0;
       line-height: 1.2;
     }
-
-    /* --- Form --- */
+    /* ---------- FORM ---------- */
     form {
       display: flex;
-      gap: .5rem;
-      margin-bottom: 1rem;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
     }
     input[type="text"] {
       flex: 1;
-      padding: .75rem 1rem;
+      padding: 0.75rem 1rem;
       font-size: 1rem;
       border: 1px solid #cfd8dc;
-      border-radius: .5rem;
+      border-radius: 0.5rem;
     }
     button {
       background: var(--gpt-green);
       color: #fff;
       border: 0;
       font-size: 1rem;
-      padding: .75rem 1.25rem;
-      border-radius: .5rem;
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.5rem;
       cursor: pointer;
-      transition: opacity .2s ease;
+      transition: opacity 0.2s ease;
     }
     button:hover {
-      opacity: .85;
+      opacity: 0.85;
     }
-
-    /* --- Animation panel --- */
+    /* ---------- SHARE SECTION ---------- */
+    #shareSection {
+      display: none;
+      margin-bottom: 1.25rem;
+      text-align: left;
+      word-break: break-all;
+    }
+    #shareSection p {
+      margin: 0 0 0.5rem 0;
+      font-weight: bold;
+    }
+    .share-container {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    #shareAnchor {
+      flex: 1 1 auto;
+      padding: 0.5rem 0;
+    }
+    #copyBtn {
+      padding: 0.5rem 1rem;
+    }
+    /* ---------- ANIMATION ---------- */
     #animation {
       display: none;
       text-align: left;
       font-size: 1.25rem;
       border: 1px solid #cfd8dc;
-      border-radius: .5rem;
-      padding: .75rem 1rem;
+      border-radius: 0.5rem;
+      padding: 0.75rem 1rem;
       line-height: 1.5;
       min-height: 3rem;
       white-space: pre-wrap;
@@ -95,14 +113,17 @@
       display: inline-block;
       width: 8px;
       background: var(--text);
-      animation: blink .8s steps(1) infinite;
+      animation: blink 0.8s steps(1) infinite;
     }
     @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
+      0%,
+      100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0;
+      }
     }
-
-    /* --- Call‑to‑action --- */
     #cta {
       display: none;
       margin-top: 1.5rem;
@@ -116,77 +137,121 @@
       Let Me <span style="color: var(--gpt-green);">ChatGPT</span> That For You
     </h1>
 
-    <!-- Query form -->
+    <!-- 1 ▸ Input form shown when no query param -->
     <form id="queryForm">
-      <input type="text" id="queryInput" placeholder="Enter your question..." autocomplete="off" />
-      <button type="submit">Generate Link</button>
+      <input
+        type="text"
+        id="queryInput"
+        placeholder="Enter your question…"
+        autocomplete="off"
+      />
+      <button type="submit">Create Link</button>
     </form>
+
+    <!-- Shareable link -->
+    <div id="shareSection">
+      <p>Your shareable link:</p>
+      <div class="share-container">
+        <a id="shareAnchor" href="#" target="_blank" rel="noopener"></a>
+        <button id="copyBtn" type="button">Copy</button>
+      </div>
+      <small id="shareHint">Copied to clipboard.</small>
+    </div>
 
     <!-- Typing animation area -->
     <div id="animation"></div>
 
-    <!-- Redirect notice / CTA -->
-    <div id="cta">Redirecting…</div>
+    <!-- Redirect CTA (after animation) -->
+    <div id="cta"></div>
   </div>
 
-<script>
-(function () {
-  const params = new URLSearchParams(window.location.search);
-  const query = params.get('q');
-  const form = document.getElementById('queryForm');
-  const input = document.getElementById('queryInput');
+  <script>
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      const query = params.get("q");
 
-  // --- Helper: build sharable URL for this site ---
-  function buildShareLink(q) {
-    return window.location.origin + window.location.pathname + '?q=' + encodeURIComponent(q);
-  }
+      const form = document.getElementById("queryForm");
+      const input = document.getElementById("queryInput");
+      const shareSection = document.getElementById("shareSection");
+      const shareAnchor = document.getElementById("shareAnchor");
+      const copyBtn = document.getElementById("copyBtn");
+      const shareHint = document.getElementById("shareHint");
 
-  // --- Form submit => reload with ?q= ---
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
-    const q = input.value.trim();
-    if (!q) return;
-    const share = buildShareLink(q);
-    // Copy to clipboard for convenience (silently fail if not allowed)
-    navigator.clipboard?.writeText(share).catch(() => {});
-    window.location.href = share;
-  });
-
-  // --- If ?q present, play animation then redirect ---
-  if (query) {
-    form.style.display = 'none';
-
-    const animBox = document.getElementById('animation');
-    animBox.style.display = 'block';
-
-    const cta = document.getElementById('cta');
-    const text = decodeURIComponent(query);
-
-    let i = 0;
-    const cursor = document.createElement('span');
-    cursor.id = 'cursor';
-    animBox.appendChild(cursor);
-
-    const interval = setInterval(() => {
-      if (i < text.length) {
-        cursor.before(text[i]);
-        i++;
-      } else {
-        clearInterval(interval);
-        cursor.remove();
-        setTimeout(() => {
-          const target = 'https://chat.openai.com/?q=' + encodeURIComponent(text);
-          cta.innerHTML = 'Done! <a href="' + target + '" target="_blank" rel="noopener">Open in ChatGPT</a>';
-          cta.style.display = 'block';
-          // Auto‑redirect after 3 s (user can cancel via back)
-          setTimeout(() => {
-            window.location.href = target;
-          }, 3000);
-        }, 800);
+      /* ---------- Helper ---------- */
+      function buildLink(q) {
+        return (
+          window.location.origin +
+          window.location.pathname +
+          "?q=" +
+          encodeURIComponent(q)
+        );
       }
-    }, 120);
-  }
-})();
-</script>
+
+      /* ---------- Form submit ---------- */
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const q = input.value.trim();
+        if (!q) return;
+        const link = buildLink(q);
+        shareSection.style.display = "block";
+        shareAnchor.href = link;
+        shareAnchor.textContent = link;
+        // try copy to clipboard
+        navigator.clipboard?.writeText(link).then(() => {
+          shareHint.textContent = "Copied to clipboard.";
+        }).catch(() => {
+          shareHint.textContent = "Select and copy the link above.";
+        });
+      });
+
+      /* ---------- Copy button ---------- */
+      copyBtn.addEventListener("click", function () {
+        const link = shareAnchor.href;
+        navigator.clipboard?.writeText(link).then(() => {
+          copyBtn.textContent = "Copied!";
+          setTimeout(() => (copyBtn.textContent = "Copy"), 1500);
+        }).catch(() => {
+          // fallback: open prompt
+          window.prompt("Copy this link:", link);
+        });
+      });
+
+      /* ---------- Query param playback ---------- */
+      if (query) {
+        form.style.display = "none";
+        const animBox = document.getElementById("animation");
+        animBox.style.display = "block";
+
+        const text = decodeURIComponent(query);
+        let i = 0;
+        const cursor = document.createElement("span");
+        cursor.id = "cursor";
+        animBox.appendChild(cursor);
+
+        const interval = setInterval(() => {
+          if (i < text.length) {
+            cursor.before(text[i]);
+            i++;
+          } else {
+            clearInterval(interval);
+            cursor.remove();
+            const target =
+              "https://chat.openai.com/?q=" + encodeURIComponent(text);
+            const cta = document.getElementById("cta");
+            cta.innerHTML =
+              'Done! <a href="' +
+              target +
+              '" target="_blank" rel="noopener">Open in ChatGPT</a>';
+            cta.style.display = "block";
+
+            // auto-redirect after x s
+            setTimeout(() => {
+              window.location.href = target;
+            }, 500);
+          }
+        }, 120);
+      }
+    })();
+  </script>
 </body>
 </html>
